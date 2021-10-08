@@ -21,11 +21,11 @@ public class ClientModel {
     private String email;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    @JoinColumn(name = "address_id", referencedColumnName = "id", unique = true)
     private AddressModel address;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "electricity_meter_id", referencedColumnName = "id")
+    @JoinColumn(name = "electricity_meter_id", referencedColumnName = "id", unique = true)
     private ElectricityMeterModel electricityMeter;
 
     public ClientModel() {

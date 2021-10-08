@@ -1,11 +1,324 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
-   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
-   http://www.liquibase.org/xml/ns/dbchangelog
-   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
+    <changeSet id="create" author="Matija Popijač">
+        <createTable tableName="addresses">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="city" type="varchar(255)"/>
+            <column name="country" type="varchar(255)"/>
+            <column name="postal_code" type="varchar(20)"/>
+            <column name="street" type="varchar(255)"/>
+        </createTable>
 
+        <addUniqueConstraint tableName="addresses" columnNames="street,country,city"/>
+
+        <createTable tableName="electricity_meter_readings">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="consumed_energy" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="month" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="year" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="electricity_meter_id" type="bigint"/>
+        </createTable>
+        <addUniqueConstraint tableName="electricity_meter_readings" columnNames="year,month,electricity_meter_id"/>
+
+        <createTable tableName="electricity_meters">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="serial_number" type="varchar(255)"/>
+        </createTable>
+
+        <createTable tableName="clients">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(255)"/>
+            <column name="last_name" type="varchar(255)"/>
+            <column name="address_id" type="bigint"/>
+            <column name="electricity_meter_id" type="bigint"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="clients" columnNames="address_id"/>
+        <addUniqueConstraint tableName="clients" columnNames="electricity_meter_id"/>
+
+        <addForeignKeyConstraint baseTableName="clients"
+                                 baseColumnNames="address_id"
+                                 constraintName="fk_address_clients"
+                                 referencedTableName="addresses"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="clients"
+                                 baseColumnNames="electricity_meter_id"
+                                 constraintName="fk_electricity_meters_clients"
+                                 referencedTableName="electricity_meters"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="electricity_meter_readings"
+                                 baseColumnNames="electricity_meter_id"
+                                 constraintName="fk_electricity_meters_electricity_readings"
+                                 referencedTableName="electricity_meters"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+
+        <createTable tableName="hibernate_sequence">
+            <column name="next_val" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet runInTransaction="true" dbms="mysql" id="insert" author="Matija Popijač">
+        <insert tableName="addresses">
+            <column name="id" valueNumeric="1"/>
+            <column name="city" value="Varaždin"/>
+            <column name="country" value="Croatia"/>
+            <column name="postal_code" value="42000"/>
+            <column name="street" value="Ulica Braće Radića 150"/>
+        </insert>
+        <insert tableName="addresses">
+            <column name="id" valueNumeric="2"/>
+            <column name="city" value="Zagreb"/>
+            <column name="country" value="Croatia"/>
+            <column name="postal_code" value="10000"/>
+            <column name="street" value="Slavonska Avenija 120"/>
+        </insert>
+        <insert tableName="electricity_meters">
+            <column name="id" valueNumeric="1"/>
+            <column name="serial_number" value="00001"/>
+        </insert>
+        <insert tableName="electricity_meters">
+            <column name="id" valueNumeric="2"/>
+            <column name="serial_number" value="00002"/>
+        </insert>
+        <insert tableName="clients">
+            <column name="id" valueNumeric="1"/>
+            <column name="address_id" valueNumeric="1"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="email" value="matija-popijac@mail.com"/>
+            <column name="first_name" value="Matija"/>
+            <column name="last_name" value="Popijač"/>
+        </insert>
+        <insert tableName="clients">
+            <column name="id" valueNumeric="2"/>
+            <column name="address_id" valueNumeric="2"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="email" value="new-email@mail.com"/>
+            <column name="first_name" value="First"/>
+            <column name="last_name" value="Last"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="1"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="10"/>
+            <column name="month" valueNumeric="1"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="2"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="20"/>
+            <column name="month" valueNumeric="2"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="3"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="30"/>
+            <column name="month" valueNumeric="3"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="4"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="40"/>
+            <column name="month" valueNumeric="4"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="5"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="50"/>
+            <column name="month" valueNumeric="5"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="6"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="60"/>
+            <column name="month" valueNumeric="6"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="7"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="70"/>
+            <column name="month" valueNumeric="7"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="8"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="80"/>
+            <column name="month" valueNumeric="8"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="9"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="90"/>
+            <column name="month" valueNumeric="9"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="10"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="100"/>
+            <column name="month" valueNumeric="10"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="11"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="110"/>
+            <column name="month" valueNumeric="11"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="12"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="120"/>
+            <column name="month" valueNumeric="12"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="13"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="10"/>
+            <column name="month" valueNumeric="1"/>
+            <column name="year" valueNumeric="2021"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="14"/>
+            <column name="electricity_meter_id" valueNumeric="1"/>
+            <column name="consumed_energy" valueNumeric="20"/>
+            <column name="month" valueNumeric="2"/>
+            <column name="year" valueNumeric="2021"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="15"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="10"/>
+            <column name="month" valueNumeric="1"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="16"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="20"/>
+            <column name="month" valueNumeric="2"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="17"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="30"/>
+            <column name="month" valueNumeric="3"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="18"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="40"/>
+            <column name="month" valueNumeric="4"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="19"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="50"/>
+            <column name="month" valueNumeric="5"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="20"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="60"/>
+            <column name="month" valueNumeric="6"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="21"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="70"/>
+            <column name="month" valueNumeric="7"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="22"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="80"/>
+            <column name="month" valueNumeric="8"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="23"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="90"/>
+            <column name="month" valueNumeric="9"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="24"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="100"/>
+            <column name="month" valueNumeric="10"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="25"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="110"/>
+            <column name="month" valueNumeric="11"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="26"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="120"/>
+            <column name="month" valueNumeric="12"/>
+            <column name="year" valueNumeric="2020"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="27"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="10"/>
+            <column name="month" valueNumeric="1"/>
+            <column name="year" valueNumeric="2021"/>
+        </insert>
+        <insert tableName="electricity_meter_readings">
+            <column name="id" valueNumeric="28"/>
+            <column name="electricity_meter_id" valueNumeric="2"/>
+            <column name="consumed_energy" valueNumeric="20"/>
+            <column name="month" valueNumeric="2"/>
+            <column name="year" valueNumeric="2021"/>
+        </insert>
+
+    </changeSet>
 </databaseChangeLog>

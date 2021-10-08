@@ -3,7 +3,7 @@ package hr.mpopijac.electricity_tracker.models;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "addresses")
+@Table(name = "addresses", uniqueConstraints = @UniqueConstraint(columnNames = {"country","street", "city"}))
 public class AddressModel {
 
     @Id
