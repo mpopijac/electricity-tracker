@@ -6,6 +6,7 @@ import hr.mpopijac.electricity_tracker.ElectricityTrackerApplication;
 import hr.mpopijac.electricity_tracker.dto.ElectricityMeterReadingDto;
 import hr.mpopijac.electricity_tracker.dto.YearlyEnergyConsumptionDto;
 import hr.mpopijac.electricity_tracker.models.ElectricityMeterReadingModel;
+import hr.mpopijac.electricity_tracker.repository.ClientRepository;
 import hr.mpopijac.electricity_tracker.repository.ElectricityMeterReadingRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
+import java.time.Month;
 import java.util.Optional;
 
 import static hr.mpopijac.electricity_tracker.controllers.AbstractController.BASE_API_URL;
@@ -40,6 +42,9 @@ public class ElectricityMeterReadingsControllerIntegrationTest {
 
     @Autowired
     private ElectricityMeterReadingRepository electricityMeterReadingRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     @Before
     public void setUp() {
@@ -236,6 +241,98 @@ public class ElectricityMeterReadingsControllerIntegrationTest {
         assertEquals("ElectricityMeterReading for year:2020 and month:1 already exists.", exceptionMessage);
     }
 
+    @Test
+    public void updateMeterReading() throws Exception {
+        final String clientId = "1";
+        final String uri = BASE_API_URL + "/client/" + clientId + "/electricity-meter-readings/updateMeterReading";
+        final ElectricityMeterReadingDto requestData = new ElectricityMeterReadingDto();
+        requestData.setYear(2021);
+        requestData.setMonth(1);
+        requestData.setConsumedEnergy(20);
+
+        final MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestData))
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn();
+
+        final int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+
+        requestData.setConsumedEnergy(10);
+        final MvcResult mvcResult_rollback = mvc.perform(MockMvcRequestBuilders.put(uri)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestData))
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn();
+        assertEquals(200, mvcResult_rollback.getResponse().getStatus());
+    }
+
+    @Test
+    public void updateMeterReading_readingNotFound() throws Exception {
+        final String clientId = "1";
+        final String uri = BASE_API_URL + "/client/" + clientId + "/electricity-meter-readings/updateMeterReading";
+        final ElectricityMeterReadingDto requestData = new ElectricityMeterReadingDto();
+        requestData.setYear(1888);
+        requestData.setMonth(1);
+        requestData.setConsumedEnergy(20);
+
+        final MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestData))
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn();
+
+        final int status = mvcResult.getResponse().getStatus();
+        assertEquals(400, status);
+        assertEquals("Electricity meter reading for year:1888 and month:1 is not found.", mvcResult.getResolvedException().getMessage());
+    }
+
+    @Test
+    public void deleteMeterReading() throws Exception {
+        final Long clientId = 1L;
+        final Integer year = 1888;
+        final Integer month = 1;
+
+        ElectricityMeterReadingModel electricityMeterReading = new ElectricityMeterReadingModel();
+        electricityMeterReading.setYear(year);
+        electricityMeterReading.setMonth(Month.JANUARY);
+        electricityMeterReading.setConsumedEnergy(100);
+        electricityMeterReading.setElectricityMeter(clientRepository.findById(clientId).get().getElectricityMeter());
+        electricityMeterReadingRepository.save(electricityMeterReading);
+
+        final String uri = BASE_API_URL + "/client/" + clientId + "/electricity-meter-readings/" + year + "/" + month + "/";
+
+        final MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(uri)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn();
+
+        final int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+
+        Optional<ElectricityMeterReadingModel> objectExist = electricityMeterReadingRepository.findAll().stream().filter(emr -> emr.getYear().equals(year))
+                .filter(emr -> emr.getMonth().getValue() == month)
+                .filter(emr -> emr.getElectricityMeter().getClient().getId().equals(clientId))
+                .findFirst();
+        assertFalse(objectExist.isPresent());
+    }
+
+    @Test
+    public void deleteMeterReading_readingNotFound() throws Exception {
+        final Long clientId = 1L;
+        final Integer year = 1888;
+        final Integer month = 1;
+
+        final String uri = BASE_API_URL + "/client/" + clientId + "/electricity-meter-readings/" + year + "/" + month + "/";
+
+        final MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(uri)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn();
+
+        final int status = mvcResult.getResponse().getStatus();
+        assertEquals(400, status);
+        assertEquals("Electricity meter reading for year:1888 and month:1 is not found.",mvcResult.getResolvedException().getMessage());
+    }
 
     private <T> T mapFromJson(String json, Class<T> clazz)
             throws JsonParseException, IOException {

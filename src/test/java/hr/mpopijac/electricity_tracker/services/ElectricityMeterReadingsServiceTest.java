@@ -5,6 +5,7 @@ import hr.mpopijac.electricity_tracker.dto.ElectricityMeterReadingDto;
 import hr.mpopijac.electricity_tracker.dto.YearlyEnergyConsumptionDto;
 import hr.mpopijac.electricity_tracker.exceptions.ClientNotFoundException;
 import hr.mpopijac.electricity_tracker.exceptions.ElectricityMeterNotFoundException;
+import hr.mpopijac.electricity_tracker.exceptions.ElectricityMeterReadingNotFoundException;
 import hr.mpopijac.electricity_tracker.exceptions.EntityAlreadyExistsException;
 import hr.mpopijac.electricity_tracker.models.ClientModel;
 import hr.mpopijac.electricity_tracker.models.ElectricityMeterModel;
@@ -26,7 +27,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ElectricityMeterReadingsServiceTest {
@@ -55,14 +56,11 @@ public class ElectricityMeterReadingsServiceTest {
         client.setId(CLIENT_ID);
     }
 
-    @Test
+    @Test(expected = ElectricityMeterNotFoundException.class)
     public void getAggregateMeterReading_clientWithoutElectricityMeter() {
         when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
 
-        final YearlyEnergyConsumptionDto yearlyEnergyConsumptionDto = electricityMeterReadingsService.getAggregateMeterReading(CLIENT_ID, YEAR);
-
-        assertEquals(YEAR, yearlyEnergyConsumptionDto.getYear());
-        assertEquals(0, yearlyEnergyConsumptionDto.getAggregateConsumedEnergy().intValue());
+        electricityMeterReadingsService.getAggregateMeterReading(CLIENT_ID, YEAR);
     }
 
     @Test
@@ -116,7 +114,7 @@ public class ElectricityMeterReadingsServiceTest {
 
         when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
 
-        final YearlyEnergyConsumptionDto yearlyEnergyConsumptionDto = electricityMeterReadingsService.getMeterReadings(CLIENT_ID, YEAR, null);
+        final YearlyEnergyConsumptionDto yearlyEnergyConsumptionDto = electricityMeterReadingsService.getMeterReadings(CLIENT_ID, YEAR, Optional.ofNullable(null));
         assertEquals(YEAR, yearlyEnergyConsumptionDto.getYear());
         assertEquals(12, yearlyEnergyConsumptionDto.getConsumptionPerMonth().size());
         assertEquals(1, (int) yearlyEnergyConsumptionDto.getConsumptionPerMonth().get(0).getMonth());
@@ -133,7 +131,7 @@ public class ElectricityMeterReadingsServiceTest {
 
         when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
 
-        final YearlyEnergyConsumptionDto yearlyEnergyConsumptionDto = electricityMeterReadingsService.getMeterReadings(CLIENT_ID, YEAR, 8);
+        final YearlyEnergyConsumptionDto yearlyEnergyConsumptionDto = electricityMeterReadingsService.getMeterReadings(CLIENT_ID, YEAR, Optional.of(8));
         assertEquals(YEAR, yearlyEnergyConsumptionDto.getYear());
         assertEquals(1, yearlyEnergyConsumptionDto.getConsumptionPerMonth().size());
         assertEquals(8, (int) yearlyEnergyConsumptionDto.getConsumptionPerMonth().get(0).getMonth());
@@ -148,19 +146,19 @@ public class ElectricityMeterReadingsServiceTest {
 
         when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
 
-        final YearlyEnergyConsumptionDto yearlyEnergyConsumptionDto = electricityMeterReadingsService.getMeterReadings(CLIENT_ID, YEAR, 20);
+        final YearlyEnergyConsumptionDto yearlyEnergyConsumptionDto = electricityMeterReadingsService.getMeterReadings(CLIENT_ID, YEAR, Optional.of(20));
         assertEquals(YEAR, yearlyEnergyConsumptionDto.getYear());
         assertEquals(0, yearlyEnergyConsumptionDto.getConsumptionPerMonth().size());
     }
 
     @Test
     public void addMeterReadings() {
-        ElectricityMeterModel electricityMeter = createElectricityMeter();
+        final ElectricityMeterModel electricityMeter = createElectricityMeter();
         client.setElectricityMeter(electricityMeter);
         electricityMeter.setElectricityMeterReadings(getElectricityMeterReadings(electricityMeter));
 
-        ElectricityMeterReadingModel electricityMeterReadingToAdd = createElectricityMeterReading(electricityMeter, 100L, 2021, Month.DECEMBER, 1200);
-        ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
+        final ElectricityMeterReadingModel electricityMeterReadingToAdd = createElectricityMeterReading(electricityMeter, 100L, 2021, Month.DECEMBER, 1200);
+        final ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
         electricityMeterReadingDtoToAdd.setYear(2021);
         electricityMeterReadingDtoToAdd.setId(100L);
 
@@ -177,7 +175,7 @@ public class ElectricityMeterReadingsServiceTest {
 
     @Test(expected = ClientNotFoundException.class)
     public void addMeterReadings_clientNotFoundException() {
-        ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
+        final ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
         electricityMeterReadingDtoToAdd.setYear(2021);
         electricityMeterReadingDtoToAdd.setId(100L);
 
@@ -188,7 +186,7 @@ public class ElectricityMeterReadingsServiceTest {
 
     @Test(expected = ElectricityMeterNotFoundException.class)
     public void addMeterReadings_electricityMeterNotFoundException() {
-        ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
+        final ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
         electricityMeterReadingDtoToAdd.setYear(2021);
         electricityMeterReadingDtoToAdd.setId(100L);
 
@@ -199,12 +197,11 @@ public class ElectricityMeterReadingsServiceTest {
 
     @Test(expected = EntityAlreadyExistsException.class)
     public void addMeterReadings_entityAlreadyExistsException() {
-        ElectricityMeterModel electricityMeter = createElectricityMeter();
+        final ElectricityMeterModel electricityMeter = createElectricityMeter();
         client.setElectricityMeter(electricityMeter);
         electricityMeter.setElectricityMeterReadings(getElectricityMeterReadings(electricityMeter));
 
-        ElectricityMeterReadingModel electricityMeterReadingToAdd = createElectricityMeterReading(electricityMeter, 100L, 2021, Month.DECEMBER, 1200);
-        ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
+        final ElectricityMeterReadingDto electricityMeterReadingDtoToAdd = new ElectricityMeterReadingDto(Month.DECEMBER, 1200);
         electricityMeterReadingDtoToAdd.setYear(2021);
         electricityMeterReadingDtoToAdd.setId(100L);
 
@@ -214,8 +211,72 @@ public class ElectricityMeterReadingsServiceTest {
         electricityMeterReadingsService.addMeterReading(CLIENT_ID, electricityMeterReadingDtoToAdd);
     }
 
+    @Test
+    public void updateMeterReadings() {
+        final ElectricityMeterModel electricityMeter = createElectricityMeter();
+        client.setElectricityMeter(electricityMeter);
+        electricityMeter.setElectricityMeterReadings(getElectricityMeterReadings(electricityMeter));
+
+        final ElectricityMeterReadingModel readingToUpdate = createElectricityMeterReading(electricityMeter, 14L, 2021, Month.JANUARY, 1200);
+
+        final ElectricityMeterReadingDto electricityMeterReadingDtoToUpdate = new ElectricityMeterReadingDto(Month.JANUARY, 1200);
+        electricityMeterReadingDtoToUpdate.setYear(2021);
+        electricityMeterReadingDtoToUpdate.setId(14L);
+
+        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
+
+        electricityMeterReadingsService.updateMeterReading(CLIENT_ID, electricityMeterReadingDtoToUpdate);
+        verify(clientRepository, times(1)).findById(CLIENT_ID);
+        verify(electricityMeterReadingRepository, times(1)).save(any());
+    }
+
+    @Test(expected = ElectricityMeterReadingNotFoundException.class)
+    public void updateMeterReadings_readingNotFound() {
+        final ElectricityMeterModel electricityMeter = createElectricityMeter();
+        client.setElectricityMeter(electricityMeter);
+        electricityMeter.setElectricityMeterReadings(getElectricityMeterReadings(electricityMeter));
+
+        final ElectricityMeterReadingModel readingToUpdate = createElectricityMeterReading(electricityMeter, 14L, 2021, Month.JANUARY, 1200);
+
+        final ElectricityMeterReadingDto electricityMeterReadingDtoToUpdate = new ElectricityMeterReadingDto(Month.JANUARY, 1200);
+        electricityMeterReadingDtoToUpdate.setYear(1800);
+        electricityMeterReadingDtoToUpdate.setId(14L);
+
+        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
+
+        electricityMeterReadingsService.updateMeterReading(CLIENT_ID, electricityMeterReadingDtoToUpdate);
+    }
+
+    @Test
+    public void deleteMeterReadings() {
+        final ElectricityMeterModel electricityMeter = createElectricityMeter();
+        client.setElectricityMeter(electricityMeter);
+        final Integer year = 2021;
+        final Integer month = 1;
+        electricityMeter.setElectricityMeterReadings(getElectricityMeterReadings(electricityMeter));
+
+        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
+
+        electricityMeterReadingsService.deleteMeterReading(CLIENT_ID, year, month);
+        verify(clientRepository, times(1)).findById(CLIENT_ID);
+        verify(electricityMeterReadingRepository, times(1)).deleteById(14L);
+    }
+
+    @Test(expected = ElectricityMeterReadingNotFoundException.class)
+    public void deleteMeterReadings_readingsNotFound() {
+        final ElectricityMeterModel electricityMeter = createElectricityMeter();
+        client.setElectricityMeter(electricityMeter);
+        final Integer year = 1800;
+        final Integer month = 1;
+        electricityMeter.setElectricityMeterReadings(getElectricityMeterReadings(electricityMeter));
+
+        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
+
+        electricityMeterReadingsService.deleteMeterReading(CLIENT_ID, year, month);
+    }
+
     private List<ElectricityMeterReadingModel> getElectricityMeterReadings(ElectricityMeterModel electricityMeter) {
-        List<ElectricityMeterReadingModel> electricityMeterReadings = new ArrayList<>();
+        final List<ElectricityMeterReadingModel> electricityMeterReadings = new ArrayList<>();
         electricityMeterReadings.add(createElectricityMeterReading(electricityMeter, 1L, 2019, Month.DECEMBER, 120));
         electricityMeterReadings.add(createElectricityMeterReading(electricityMeter, 2L, 2020, Month.JANUARY, 10));
         electricityMeterReadings.add(createElectricityMeterReading(electricityMeter, 3L, 2020, Month.FEBRUARY, 20));
