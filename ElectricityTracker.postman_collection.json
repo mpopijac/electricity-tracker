@@ -1,0 +1,194 @@
+{
+	"info": {
+		"_postman_id": "0e9087fc-4482-4ff3-accb-61aca90e2c43",
+		"name": "ElectricityTracker",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Consumed energy in selected year",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/client/1/electricity-meter-readings/2021/aggregate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"client",
+						"1",
+						"electricity-meter-readings",
+						"2021",
+						"aggregate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Energy meter readings in selected year",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/client/1/electricity-meter-readings/2021/monthly",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"client",
+						"1",
+						"electricity-meter-readings",
+						"2021",
+						"monthly"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Energy meter readings for selected month in year",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/client/1/electricity-meter-readings/2020/monthly?month=2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"client",
+						"1",
+						"electricity-meter-readings",
+						"2020",
+						"monthly"
+					],
+					"query": [
+						{
+							"key": "month",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add electricity meter reading",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"month\": 6,\r\n    \"year\": 2021,\r\n    \"consumedEnergy\": 27\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/client/1/electricity-meter-readings/addMeterReading",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"client",
+						"1",
+						"electricity-meter-readings",
+						"addMeterReading"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update electricity meter reading",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"month\": 6,\r\n    \"year\": 2021,\r\n    \"consumedEnergy\": 66\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/client/1/electricity-meter-readings/updateMeterReading",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"client",
+						"1",
+						"electricity-meter-readings",
+						"updateMeterReading"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete electricity meter reading",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/rest/api/v1/client/1/electricity-meter-readings/2021/6/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest",
+						"api",
+						"v1",
+						"client",
+						"1",
+						"electricity-meter-readings",
+						"2021",
+						"6",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
