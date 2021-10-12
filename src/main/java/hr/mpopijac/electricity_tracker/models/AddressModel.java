@@ -3,11 +3,11 @@ package hr.mpopijac.electricity_tracker.models;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "addresses", uniqueConstraints = @UniqueConstraint(columnNames = {"country","street", "city"}))
+@Table(name = "addresses", uniqueConstraints = @UniqueConstraint(columnNames = {"country", "street", "city"}))
 public class AddressModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 

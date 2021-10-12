@@ -7,7 +7,7 @@ import javax.persistence.*;
 public class ClientModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
@@ -20,11 +20,11 @@ public class ClientModel {
     @Column(nullable = false)
     private String email;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "address_id", referencedColumnName = "id", unique = true)
     private AddressModel address;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "electricity_meter_id", referencedColumnName = "id", unique = true)
     private ElectricityMeterModel electricityMeter;
 

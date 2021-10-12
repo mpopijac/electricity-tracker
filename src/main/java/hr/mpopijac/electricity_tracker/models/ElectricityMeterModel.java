@@ -9,7 +9,7 @@ import java.util.List;
 @Table(name = "electricity_meters")
 public class ElectricityMeterModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 

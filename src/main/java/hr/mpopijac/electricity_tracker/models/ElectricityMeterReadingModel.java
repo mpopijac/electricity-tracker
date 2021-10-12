@@ -5,10 +5,10 @@ import javax.persistence.*;
 import java.time.Month;
 
 @Entity
-@Table(name = "electricity_meter_readings", uniqueConstraints = @UniqueConstraint(columnNames = {"year","month", "electricity_meter_id"}))
+@Table(name = "electricity_meter_readings", uniqueConstraints = @UniqueConstraint(columnNames = {"year", "month", "electricity_meter_id"}))
 public class ElectricityMeterReadingModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
