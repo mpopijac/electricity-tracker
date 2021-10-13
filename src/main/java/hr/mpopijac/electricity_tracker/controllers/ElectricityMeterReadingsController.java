@@ -81,7 +81,7 @@ public class ElectricityMeterReadingsController extends AbstractController {
      *
      * @param clientId     identifier
      * @param meterReading update data
-     * @return
+     * @return only HTTP status 200
      * @throws ClientNotFoundException,
      * @throws ElectricityMeterNotFoundException,
      * @throws ElectricityMeterReadingNotFoundException
@@ -99,7 +99,7 @@ public class ElectricityMeterReadingsController extends AbstractController {
      * @param clientId identifier
      * @param year     selected
      * @param month    selected
-     * @return
+     * @return only HTTP status 200
      * @throws ClientNotFoundException,
      * @throws ElectricityMeterNotFoundException,
      * @throws ElectricityMeterReadingNotFoundException
